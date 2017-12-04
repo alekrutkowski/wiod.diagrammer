@@ -139,7 +139,7 @@ collapseAndFormatOptions <- function(charvec)
 #' \describe{
 #'   \item{\code{units_suffix}}{a string (character vector of length 1) with a name
 #'   of the monetary units (default: \code{"bn USD"}). This element
-#'   should be consistent with the next element \code{mln_USD_exchange_rate}}!
+#'   should be consistent with the next element \code{mln_USD_exchange_rate}!}
 #'   \item{\code{mln_USD_exchange_rate}}{a single value (numeric vector of length 1)
 #'   by which the original WIOD numbers (which are in million US dollars) will be
 #'   multiplied (default: \code{0.001}, so that the values become billion US dollars).

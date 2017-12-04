@@ -1,3 +1,5 @@
 **/README_cache
 *.RData
 **/.Rproj.user
+.Rproj.user
+.Rhistory
