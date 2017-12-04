@@ -1,27 +1,37 @@
+wiod.diagrammer -- R package for an easy work with WIOD (the 2016 release) including diagramming (flowcharts)
+================
+Aleksander Rutkowski
+2017-12-04
+
 Installation
 ------------
 
-    ## if package `devtools` not installed, first do this:
-    # install.packages('devtools')
-    devtools::install_github('alekrutkowski/wiod.diagrammer')
+``` r
+## if package `devtools` not installed, first do this:
+# install.packages('devtools')
+devtools::install_github('alekrutkowski/wiod.diagrammer')
+```
 
 Example
 -------
 
-Load WIOD data for a given year from an official WIOD .Rdata file
-(release 2016), which has to be first downloaded from
-<http://www.wiod.org/protected3/data16/wiot_ROW/wiot_r_Nov16.zip> and
-extracted (unzipped).
+Load WIOD data for a given year from an official WIOD .Rdata file (release 2016), which has to be first downloaded from <http://www.wiod.org/protected3/data16/wiot_ROW/wiot_r_Nov16.zip> and extracted (unzipped).
 
-    library(wiod.diagrammer)
+``` r
+library(wiod.diagrammer)
+```
 
-    W <- loadWIOD('WIOT2014_October16_ROW.RData')
+``` r
+W <- loadWIOD('WIOT2014_October16_ROW.RData')
+```
 
     ## Loading "WIOT2014_October16_ROW.RData"...
 
-    # Check the names of the first 10 columns:
-    cat(head(colnames(W), 20),
-        sep='\n')
+``` r
+# Check the names of the first 10 columns:
+cat(head(colnames(W), 20),
+    sep='\n')
+```
 
     ## IndustryCode
     ## IndustryDescription
@@ -44,19 +54,25 @@ extracted (unzipped).
     ## AUS15
     ## AUS16
 
-    # How many columns and rows?
-    message(ncol(W),' columns; ',nrow(W),' rows')
+``` r
+# How many columns and rows?
+message(ncol(W),' columns; ',nrow(W),' rows')
+```
 
     ## 2689 columns; 2472 rows
 
 Now let's flatten (reshape into long format):
 
-    W_flat <- flatWIOD(W)
+``` r
+W_flat <- flatWIOD(W)
+```
 
     ## Reshaping into long/flat format...
 
-    # See the structure of W:
-    str(W_flat)
+``` r
+# See the structure of W:
+str(W_flat)
+```
 
     ## Classes 'data.table' and 'data.frame':   6613376 obs. of  5 variables:
     ##  $ ExpSectorNr: int  1 2 3 4 5 6 7 8 9 10 ...
@@ -67,7 +83,9 @@ Now let's flatten (reshape into long format):
     ##  - attr(*, ".internal.selfref")=<externalptr> 
     ##  - attr(*, "isFlatWIOD")= logi TRUE
 
-    head(W_flat, 10)
+``` r
+head(W_flat, 10)
+```
 
     ##     ExpSectorNr ExpCountry       value ImpSectorNr ImpCountry
     ##  1:           1        AUS 12924.17969           1        AUS
@@ -81,7 +99,9 @@ Now let's flatten (reshape into long format):
     ##  9:           9        AUS    64.61939           1        AUS
     ## 10:          10        AUS   877.44099           1        AUS
 
-    tail(W_flat, 10)
+``` r
+tail(W_flat, 10)
+```
 
     ##     ExpSectorNr ExpCountry         value ImpSectorNr ImpCountry
     ##  1:          47        ROW  3662.2757637          61        ROW
@@ -95,29 +115,20 @@ Now let's flatten (reshape into long format):
     ##  9:          55        ROW   -73.4200616          61        ROW
     ## 10:          56        ROW     0.8743851          61        ROW
 
-`wiod.diagrammer` uses internally the
-[`data.table`](https://cran.r-project.org/web/packages/data.table/index.html)
-package for performance. You can work with `W_flat` using the
-`data.table`'s semantcs (e.g. the `:=` in-place column
-generation/modification) or, if you prefer base R `data.frame`s, you may
-convert `W_flat` into a regular `data.frame` with the function
-`as.data.frame`, do the modifications, and then convert it back into
-`data.table` with the function `data.table::as.data.table` for further
-processing (through the function `findLinks` described below).
+`wiod.diagrammer` uses internally the [`data.table`](https://cran.r-project.org/web/packages/data.table/index.html) package for performance. You can work with `W_flat` using the `data.table`'s semantcs (e.g. the `:=` in-place column generation/modification) or, if you prefer base R `data.frame`s, you may convert `W_flat` into a regular `data.frame` with the function `as.data.frame`, do the modifications, and then convert it back into `data.table` with the function `data.table::as.data.table` for further processing (through the function `findLinks` described below).
 
-Now let's find the top supplier-user linkages in WIOD (as defined by the
-column `value` in `W_flat` which -- if not modified -- corresponds to
-the intermediate consumption in `W`).
+Now let's find the top supplier-user linkages in WIOD (as defined by the column `value` in `W_flat` which -- if not modified -- corresponds to the intermediate consumption in `W`).
 
-First let's introduce a helper function `tieRobustRankLessOrEqual`
-(available in `wiod.diagrammer`) comparing it with base R `rank`:
+First let's introduce a helper function `tieRobustRankLessOrEqual` (available in `wiod.diagrammer`) comparing it with base R `rank`:
 
-    x <- c(1,1,2,2,2,3,3)
-    # A comparison:
-    print(data.frame(x,
-                     rank(x) <= 2,
-                     tieRobustRankLessOrEqual(x, 2),
-                     check.names = FALSE))
+``` r
+x <- c(1,1,2,2,2,3,3)
+# A comparison:
+print(data.frame(x,
+                 rank(x) <= 2,
+                 tieRobustRankLessOrEqual(x, 2),
+                 check.names = FALSE))
+```
 
     ##  x   rank(x) <= 2   tieRobustRankLessOrEqual(x, 2)  
     ##  1    TRUE           TRUE                           
@@ -128,40 +139,34 @@ First let's introduce a helper function `tieRobustRankLessOrEqual`
     ##  3   FALSE          FALSE                           
     ##  3   FALSE          FALSE
 
-Now, let's find e.g. the 3 main customers of German automotive industry
-as well as 2 main customers of those customers and 1 main customer of
-those customer's customers (we could go even deeper if we wanted or use
-different cut-off ranks, not necessarily in the declining order). So, we
-have 3 levels of linkages (the 1st one -- direct, the 2nd one and the
-3rd one -- indirect). NB: Some industries may re-emerge at different
-rounds and they may be both customers and suppliers at the same time.
-Let's also differentiate our ranks (top 3, 2, and 1) by one more
-dimension: domestic vs foreign linkages.
+Now, let's find e.g. the 3 main customers of German automotive industry as well as 2 main customers of those customers and 1 main customer of those customer's customers (we could go even deeper if we wanted or use different cut-off ranks, not necessarily in the declining order). So, we have 3 levels of linkages (the 1st one -- direct, the 2nd one and the 3rd one -- indirect). NB: Some industries may re-emerge at different rounds and they may be both customers and suppliers at the same time. Let's also differentiate our ranks (top 3, 2, and 1) by one more dimension: domestic vs foreign linkages.
 
-    W_flat[, domestic :=   # creating column in-place, following data.table's semantics
-               ExpCountry == ImpCountry]
-    # Let's get rid of self-produced intermediate consumption
-    W_flat_noself <- W_flat[!(domestic &
-                                  ExpSectorNr == ImpSectorNr)]
-    # Let's keep only intra-EU trade
-    COUNTRIES_DT <- countries()
-    EU_COUNTRIES <-
-        COUNTRIES_DT$Country[COUNTRIES_DT$isEUmember]
-    # Let's keep only flows >= 1 billion USD for clarity
-    W_flat_noself_truncated <- W_flat_noself[value >= 1000 &  # original WIOD data is in million USD
-                                                 ExpCountry %in% EU_COUNTRIES &
-                                                 ImpCountry %in% EU_COUNTRIES]
-    TOP_CUSTOMERS <-
-        findLinks(partners = 'users',
-                  flat_wiod = W_flat_noself_truncated,
-                  start_countries = 'DEU', # We could add here other countries.
-                  start_sectors = 20, # "Manufacture of motor vehicles, trailers and semi-trailers"
-                                      # We could add here other sectors.
-                  ListOfselectionFuns = # As discussed in the text above:
-                      list(function(flat_wiod) tieRobustRankLessOrEqual(-flat_wiod$value, 3),  # minus because we
-                           function(flat_wiod) tieRobustRankLessOrEqual(-flat_wiod$value, 2),  # want to rank from
-                           function(flat_wiod) tieRobustRankLessOrEqual(-flat_wiod$value, 1)), # the highest to the lowest
-                  by = c('domestic','ExpCountry','ExpSectorNr')) # as discussed above
+``` r
+W_flat[, domestic :=   # creating column in-place, following data.table's semantics
+           ExpCountry == ImpCountry]
+# Let's get rid of self-produced intermediate consumption
+W_flat_noself <- W_flat[!(domestic &
+                              ExpSectorNr == ImpSectorNr)]
+# Let's keep only intra-EU trade
+COUNTRIES_DT <- countries()
+EU_COUNTRIES <-
+    COUNTRIES_DT$Country[COUNTRIES_DT$isEUmember]
+# Let's keep only flows >= 1 billion USD for clarity
+W_flat_noself_truncated <- W_flat_noself[value >= 1000 &  # original WIOD data is in million USD
+                                             ExpCountry %in% EU_COUNTRIES &
+                                             ImpCountry %in% EU_COUNTRIES]
+TOP_CUSTOMERS <-
+    findLinks(partners = 'users',
+              flat_wiod = W_flat_noself_truncated,
+              start_countries = 'DEU', # We could add here other countries.
+              start_sectors = 20, # "Manufacture of motor vehicles, trailers and semi-trailers"
+                                  # We could add here other sectors.
+              ListOfselectionFuns = # As discussed in the text above:
+                  list(function(flat_wiod) tieRobustRankLessOrEqual(-flat_wiod$value, 3),  # minus because we
+                       function(flat_wiod) tieRobustRankLessOrEqual(-flat_wiod$value, 2),  # want to rank from
+                       function(flat_wiod) tieRobustRankLessOrEqual(-flat_wiod$value, 1)), # the highest to the lowest
+              by = c('domestic','ExpCountry','ExpSectorNr')) # as discussed above
+```
 
     ## Round 1...
     ## Selecting users (country and sector combinations)
@@ -176,7 +181,9 @@ dimension: domestic vs foreign linkages.
     ## for each combination of: `domestic`,`ExpCountry`,`ExpSectorNr`...
     ## Accumulated 10 unique users.
 
-    str(TOP_CUSTOMERS)
+``` r
+str(TOP_CUSTOMERS)
+```
 
     ## Classes 'SelectedLinksDT', 'data.table' and 'data.frame':    10 obs. of  6 variables:
     ##  $ ExpSectorNr: int  20 20 20 20 20 20 19 19 19 19
@@ -187,7 +194,9 @@ dimension: domestic vs foreign linkages.
     ##  $ domestic   : logi  FALSE FALSE FALSE TRUE TRUE TRUE ...
     ##  - attr(*, ".internal.selfref")=<externalptr>
 
-    head(TOP_CUSTOMERS, 20)
+``` r
+head(TOP_CUSTOMERS, 20)
+```
 
     ##     ExpSectorNr ExpCountry     value ImpSectorNr ImpCountry domestic
     ##  1:          20        DEU  4626.951          57        ESP    FALSE
@@ -201,20 +210,21 @@ dimension: domestic vs foreign linkages.
     ##  9:          19        DEU  9941.646          20        DEU     TRUE
     ## 10:          19        DEU 37712.819          60        DEU     TRUE
 
-Now let's do a similar exercise, just "upstream" i.e. for suppliers of
-suppliers.
+Now let's do a similar exercise, just "upstream" i.e. for suppliers of suppliers.
 
-    TOP_SUPPLIERS <-
-        findLinks(partners = 'suppliers',
-                  flat_wiod = W_flat_noself_truncated,
-                  start_countries = 'DEU', # We could add here other countries.
-                  start_sectors = 20, # "Manufacture of motor vehicles, trailers and semi-trailers"
-                                      # We could add here other sectors.
-                  ListOfselectionFuns = # As discussed in the text above:
-                      list(function(flat_wiod) tieRobustRankLessOrEqual(-flat_wiod$value, 3),  # minus because we
-                           function(flat_wiod) tieRobustRankLessOrEqual(-flat_wiod$value, 2),  # want to rank from
-                           function(flat_wiod) tieRobustRankLessOrEqual(-flat_wiod$value, 1)), # the highest to the lowest
-                  by = c('domestic','ImpCountry','ImpSectorNr')) # as discussed above
+``` r
+TOP_SUPPLIERS <-
+    findLinks(partners = 'suppliers',
+              flat_wiod = W_flat_noself_truncated,
+              start_countries = 'DEU', # We could add here other countries.
+              start_sectors = 20, # "Manufacture of motor vehicles, trailers and semi-trailers"
+                                  # We could add here other sectors.
+              ListOfselectionFuns = # As discussed in the text above:
+                  list(function(flat_wiod) tieRobustRankLessOrEqual(-flat_wiod$value, 3),  # minus because we
+                       function(flat_wiod) tieRobustRankLessOrEqual(-flat_wiod$value, 2),  # want to rank from
+                       function(flat_wiod) tieRobustRankLessOrEqual(-flat_wiod$value, 1)), # the highest to the lowest
+              by = c('domestic','ImpCountry','ImpSectorNr')) # as discussed above
+```
 
     ## Round 1...
     ## Selecting suppliers (country and sector combinations)
@@ -229,7 +239,9 @@ suppliers.
     ## for each combination of: `domestic`,`ImpCountry`,`ImpSectorNr`...
     ## Accumulated 38 unique suppliers.
 
-    str(TOP_SUPPLIERS)
+``` r
+str(TOP_SUPPLIERS)
+```
 
     ## Classes 'SelectedLinksDT', 'data.table' and 'data.frame':    38 obs. of  6 variables:
     ##  $ ExpSectorNr: int  20 20 20 15 16 28 15 15 24 31 ...
@@ -240,7 +252,9 @@ suppliers.
     ##  $ domestic   : logi  FALSE FALSE FALSE TRUE TRUE TRUE ...
     ##  - attr(*, ".internal.selfref")=<externalptr>
 
-    head(TOP_SUPPLIERS, 20)
+``` r
+head(TOP_SUPPLIERS, 20)
+```
 
     ##     ExpSectorNr ExpCountry     value ImpSectorNr ImpCountry domestic
     ##  1:          20        CZE  5912.361          20        DEU    FALSE
@@ -264,45 +278,28 @@ suppliers.
     ## 19:          20        DEU  3146.213          20        HUN    FALSE
     ## 20:          20        DEU  3111.205          20        POL    FALSE
 
-Now, let's plot the "upstream" linkages, making all the German sectors
-blue. By default, the cross-border flows are dashed, while the domestic
-flows are solid lines (arrows). The numbers in the nodes (rectangles)
-represent, by default, the sector output (or the total intermediate
-consumption for the final use sectors such as final consumption or
-investment if they show up in the customers' graphs).
+Now, let's plot the "upstream" linkages, making all the German sectors blue. By default, the cross-border flows are dashed, while the domestic flows are solid lines (arrows). The numbers in the nodes (rectangles) represent, by default, the sector output (or the total intermediate consumption for the final use sectors such as final consumption or investment if they show up in the customers' graphs).
 
-In `wiod.diagrammer` the rendering of the plot is done internally by
-[`DiagrammeR::grViz`](https://www.rdocumentation.org/packages/DiagrammeR/topics/grViz).
-The plots can be saved manually in RStudio, or programmatically e.g. to
-an .svg file via
-[`DiagrammeRsvg::export_svg`](https://www.rdocumentation.org/packages/DiagrammeRsvg/topics/export_svg)
-to a character vector and then
-[`cat`ed](https://www.rdocumentation.org/packages/base/topics/cat), or
-to a .png file piping them through
-[`DiagrammeRsvg::export_svg`](https://www.rdocumentation.org/packages/DiagrammeRsvg/topics/export_svg),
-[`charToRaw`](https://www.rdocumentation.org/packages/base/topics/charToRaw)
-and
-[`rsvg::rsvg_png`](https://www.rdocumentation.org/packages/rsvg/topics/rsvg_png).
+In `wiod.diagrammer` the rendering of the plot is done internally by [`DiagrammeR::grViz`](https://www.rdocumentation.org/packages/DiagrammeR/topics/grViz). The plots can be saved manually in RStudio, or programmatically e.g. to an .svg file via [`DiagrammeRsvg::export_svg`](https://www.rdocumentation.org/packages/DiagrammeRsvg/topics/export_svg) to a character vector and then [`cat`ed](https://www.rdocumentation.org/packages/base/topics/cat), or to a .png file piping them through [`DiagrammeRsvg::export_svg`](https://www.rdocumentation.org/packages/DiagrammeRsvg/topics/export_svg), [`charToRaw`](https://www.rdocumentation.org/packages/base/topics/charToRaw) and [`rsvg::rsvg_png`](https://www.rdocumentation.org/packages/rsvg/topics/rsvg_png).
 
-    plot(top_links_dt = TOP_SUPPLIERS,
-         wiot = W, # this is necessary
-         specificNodeOptionsFun =  # this is optional, just to show-off:
-             function(country_sector_dt)
-                 ifelse(country_sector_dt$Country=='DEU',
-                        'style=filled, fillcolor=cadetblue1', "")) # GraphViz colour names can be found at:
-
-    ## pre-main prep time: 10 ms
-
-                                                                   # http://www.graphviz.org/doc/info/colors.html
+``` r
+plot(top_links_dt = TOP_SUPPLIERS,
+     wiot = W, # this is necessary
+     specificNodeOptionsFun =  # this is optional, just to show-off:
+         function(country_sector_dt)
+             ifelse(country_sector_dt$Country=='DEU',
+                    'style=filled, fillcolor=cadetblue1', "")) # GraphViz colour names can be found at:
+                                                               # http://www.graphviz.org/doc/info/colors.html
+```
 
 ![Graph](https://cdn.rawgit.com/alekrutkowski/wiod.diagrammer/master/Graph.svg)
 
-What else is available in the package? The functions which produce
-auxiliary `data.table`s (that are used by `wiod.diagrammer`s `plot`
-function if evaluated with default argument values).
+What else is available in the package? The functions which produce auxiliary `data.table`s (that are used by `wiod.diagrammer`s `plot` function if evaluated with default argument values).
 
-    COUNTRIES <- countries() # NB: no argument to function `countries`
-    str(COUNTRIES)
+``` r
+COUNTRIES <- countries() # NB: no argument to function `countries`
+str(COUNTRIES)
+```
 
     ## Classes 'data.table' and 'data.frame':   45 obs. of  3 variables:
     ##  $ CountryLab: chr  "Australia" "Austria" "Belgium" "Bulgaria" ...
@@ -310,7 +307,9 @@ function if evaluated with default argument values).
     ##  $ isEUmember: logi  FALSE TRUE TRUE TRUE FALSE FALSE ...
     ##  - attr(*, ".internal.selfref")=<externalptr>
 
-    print(COUNTRIES)
+``` r
+print(COUNTRIES)
+```
 
     ##  CountryLab         Country   isEUmember  
     ##  Australia          AUS       FALSE       
@@ -359,10 +358,12 @@ function if evaluated with default argument values).
     ##  Taiwan             TWN       FALSE       
     ##  United States      USA       FALSE
 
-    SECTORS <- sectors(W)
-    SECTORS[, SectorLab :=  # truncate the long sector labels just for clarity below
-                substr(SectorLab, 1, 10)]
-    str(SECTORS)
+``` r
+SECTORS <- sectors(W)
+SECTORS[, SectorLab :=  # truncate the long sector labels just for clarity below
+            substr(SectorLab, 1, 10)]
+str(SECTORS)
+```
 
     ## Classes 'data.table' and 'data.frame':   61 obs. of  4 variables:
     ##  $ SectorNr  : int  1 2 3 4 5 6 7 8 9 10 ...
@@ -371,7 +372,9 @@ function if evaluated with default argument values).
     ##  $ isFinal   : logi  FALSE FALSE FALSE FALSE FALSE FALSE ...
     ##  - attr(*, ".internal.selfref")=<externalptr>
 
-    head(SECTORS, 20)
+``` r
+head(SECTORS, 20)
+```
 
     ##     SectorNr  SectorLab SectorCode isFinal
     ##  1:        1 Crop and a        A01   FALSE
@@ -395,12 +398,15 @@ function if evaluated with default argument values).
     ## 19:       19 Manufactur        C28   FALSE
     ## 20:       20 Manufactur        C29   FALSE
 
-    AGGREGATES <- aggregates(W)
+``` r
+AGGREGATES <- aggregates(W)
+```
 
-The variable/column names produced by the function `aggregates` reflect
-those in WIOD. They are explained in the documentations of `aggregates`.
+The variable/column names produced by the function `aggregates` reflect those in WIOD. They are explained in the documentations of `aggregates`.
 
-    str(AGGREGATES) 
+``` r
+str(AGGREGATES) 
+```
 
     ## Classes 'data.table' and 'data.frame':   2684 obs. of  10 variables:
     ##  $ SectorNr: int  1 2 3 4 5 6 7 8 9 10 ...
@@ -415,7 +421,9 @@ those in WIOD. They are explained in the documentations of `aggregates`.
     ##  $ GO      : num  70292 2585 3175 171985 83504 ...
     ##  - attr(*, ".internal.selfref")=<externalptr>
 
-    head(AGGREGATES, 20)
+``` r
+head(AGGREGATES, 20)
+```
 
     ##     SectorNr Country     II_fob       TXSP EXP_adj PURR PURNR        VA
     ##  1:        1     AUS 39039.2389 501.926754       0    0     0 30489.190

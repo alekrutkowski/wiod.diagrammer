@@ -8,7 +8,7 @@ always_allow_html: yes
 
 ```{r setup, include=FALSE}
 # Rendering this doc:
-# rmarkdown::render(paste0(getwd(),'/README.Rmd'), output_format=rmarkdown::md_document(), envir=globalenv())
+# rmarkdown::render(paste0(getwd(),'/README.Rmd'), envir=globalenv())
 knitr::opts_chunk$set(echo = TRUE)
 plot <- function(...) # a trick to plot svg
     wiod.diagrammer:::plot.SelectedLinksDT(...) %>% 
@@ -162,7 +162,7 @@ or to a .png file piping them through
 [`DiagrammeRsvg::export_svg`](https://www.rdocumentation.org/packages/DiagrammeRsvg/topics/export_svg),
 [`charToRaw`](https://www.rdocumentation.org/packages/base/topics/charToRaw) and [`rsvg::rsvg_png`](https://www.rdocumentation.org/packages/rsvg/topics/rsvg_png).
 
-```{r plot, message=FALSE}
+```{r plot, message=FALSE, results='hide'}
 plot(top_links_dt = TOP_SUPPLIERS,
      wiot = W, # this is necessary
      specificNodeOptionsFun =  # this is optional, just to show-off:
