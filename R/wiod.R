@@ -402,7 +402,7 @@ findPartnersOfPartners <- function(List,
          accum_df =
              rbind(List$accum_df, top_partners)%>%
              unique %>%
-             info('Accumulated ',nrow(.),' unique ',partners,'.'))
+             info('Accumulated ',nrow(.),' unique linkages.'))
 }
 
 allIntegers <- function(numvec)
