@@ -4,8 +4,8 @@
 \alias{plot.SelectedLinksDT}
 \title{Plot a diagram (directed graph) of top linkages}
 \usage{
-plot.SelectedLinksDT(top_links_dt, wiot, units = list(units_suffix = "bn USD",
-  mln_USD_exchange_rate = 0.001),
+\method{plot}{SelectedLinksDT}(top_links_dt, wiot, units = list(units_suffix =
+  "bn USD", mln_USD_exchange_rate = 0.001),
   country_labels_dt = wiod.diagrammer::countries(),
   sector_labels_dt = wiod.diagrammer::sectors(wiot),
   aggregates_dt = wiod.diagrammer::aggregates(wiot),
