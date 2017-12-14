@@ -2,7 +2,7 @@
 % Please edit documentation in R/wiod.R
 \name{tieRobustRankLessOrEqual}
 \alias{tieRobustRankLessOrEqual}
-\title{Find top (or botton) n values with possible ties}
+\title{Find top (or bottom) n values with possible ties}
 \usage{
 tieRobustRankLessOrEqual(numvec, nth)
 }

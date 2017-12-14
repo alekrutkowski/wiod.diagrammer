@@ -302,7 +302,7 @@ flatWIOD <- function(wiot, rows=seq_len(dim(wiot)[1]), columns=seq_len(dim(wiot)
         data.table::setattr('isFlatWIOD', TRUE)
 }
 
-#' Find top (or botton) n values with possible ties
+#' Find top (or bottom) n values with possible ties
 #'
 #' A helper function -- tie-robust-rank cut-off
 #'
