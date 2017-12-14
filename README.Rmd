@@ -33,7 +33,7 @@ devtools::install_github('alekrutkowski/wiod.diagrammer')
 
 ## Documentation
 
-(https://alekrutkowski.github.io/wiod.diagrammer)
+https://alekrutkowski.github.io/wiod.diagrammer/reference/index.html
 
 ## Example
 
