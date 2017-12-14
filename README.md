@@ -1,7 +1,7 @@
 wiod.diagrammer -- R package for an easy work with WIOD (the 2016 release) including diagramming (flowcharts)
 ================
 Aleksander Rutkowski
-2017-12-04
+2017-12-14
 
 Installation
 ------------
@@ -12,6 +12,11 @@ Installation
 devtools::install_github('alekrutkowski/wiod.diagrammer')
 ```
 
+Documentation
+-------------
+
+(<https://alekrutkowski.github.io/wiod.diagrammer>)
+
 Example
 -------
 
@@ -20,6 +25,13 @@ Load WIOD data for a given year from an official WIOD .Rdata file (release 2016)
 ``` r
 library(wiod.diagrammer)
 ```
+
+    ## 
+    ## Attaching package: 'wiod.diagrammer'
+
+    ## The following object is masked _by_ '.GlobalEnv':
+    ## 
+    ##     plotLinkages
 
 ``` r
 W <- loadWIOD('WIOT2014_October16_ROW.RData')
@@ -160,7 +172,7 @@ TOP_CUSTOMERS <-
               flat_wiod = W_flat_noself_truncated,
               start_countries = 'DEU', # We could add here other countries.
               start_sectors = 20, # "Manufacture of motor vehicles, trailers and semi-trailers"
-                                  # We could add here other sectors.
+              # We could add here other sectors.
               ListOfselectionFuns = # As discussed in the text above:
                   list(function(flat_wiod) tieRobustRankLessOrEqual(-flat_wiod$value, 3),  # minus because we
                        function(flat_wiod) tieRobustRankLessOrEqual(-flat_wiod$value, 2),  # want to rank from
@@ -169,23 +181,31 @@ TOP_CUSTOMERS <-
 ```
 
     ## Round 1...
+
     ## Selecting users (country and sector combinations)
     ## for each combination of: `domestic`,`ExpCountry`,`ExpSectorNr`...
+
     ## Accumulated 6 unique linkages.
+
     ## Round 2...
+
     ## Selecting users (country and sector combinations)
     ## for each combination of: `domestic`,`ExpCountry`,`ExpSectorNr`...
+
     ## Accumulated 10 unique linkages.
+
     ## Round 3...
+
     ## Selecting users (country and sector combinations)
     ## for each combination of: `domestic`,`ExpCountry`,`ExpSectorNr`...
+
     ## Accumulated 10 unique linkages.
 
 ``` r
 str(TOP_CUSTOMERS)
 ```
 
-    ## Classes 'SelectedLinksDT', 'data.table' and 'data.frame':    10 obs. of  6 variables:
+    ## Classes 'data.table' and 'data.frame':   10 obs. of  6 variables:
     ##  $ ExpSectorNr: int  20 20 20 20 20 20 19 19 19 19
     ##  $ ExpCountry : chr  "DEU" "DEU" "DEU" "DEU" ...
     ##  $ value      : num  4627 9502 14825 6007 60939 ...
@@ -218,7 +238,7 @@ TOP_SUPPLIERS <-
               flat_wiod = W_flat_noself_truncated,
               start_countries = 'DEU', # We could add here other countries.
               start_sectors = 20, # "Manufacture of motor vehicles, trailers and semi-trailers"
-                                  # We could add here other sectors.
+              # We could add here other sectors.
               ListOfselectionFuns = # As discussed in the text above:
                   list(function(flat_wiod) tieRobustRankLessOrEqual(-flat_wiod$value, 3),  # minus because we
                        function(flat_wiod) tieRobustRankLessOrEqual(-flat_wiod$value, 2),  # want to rank from
@@ -227,23 +247,31 @@ TOP_SUPPLIERS <-
 ```
 
     ## Round 1...
+
     ## Selecting suppliers (country and sector combinations)
     ## for each combination of: `domestic`,`ImpCountry`,`ImpSectorNr`...
+
     ## Accumulated 6 unique linkages.
+
     ## Round 2...
+
     ## Selecting suppliers (country and sector combinations)
     ## for each combination of: `domestic`,`ImpCountry`,`ImpSectorNr`...
+
     ## Accumulated 24 unique linkages.
+
     ## Round 3...
+
     ## Selecting suppliers (country and sector combinations)
     ## for each combination of: `domestic`,`ImpCountry`,`ImpSectorNr`...
+
     ## Accumulated 38 unique linkages.
 
 ``` r
 str(TOP_SUPPLIERS)
 ```
 
-    ## Classes 'SelectedLinksDT', 'data.table' and 'data.frame':    38 obs. of  6 variables:
+    ## Classes 'data.table' and 'data.frame':   38 obs. of  6 variables:
     ##  $ ExpSectorNr: int  20 20 20 15 16 28 15 15 24 31 ...
     ##  $ ExpCountry : chr  "CZE" "HUN" "POL" "DEU" ...
     ##  $ value      : num  5912 5165 4258 10347 15148 ...
@@ -283,14 +311,16 @@ Now, let's plot the "upstream" linkages, making all the German sectors blue. By 
 In `wiod.diagrammer` the rendering of the plot is done internally by [`DiagrammeR::grViz`](https://www.rdocumentation.org/packages/DiagrammeR/topics/grViz). The plots can be saved manually in RStudio, or programmatically e.g. to an .svg file via [`DiagrammeRsvg::export_svg`](https://www.rdocumentation.org/packages/DiagrammeRsvg/topics/export_svg) to a character vector and then [`cat`ed](https://www.rdocumentation.org/packages/base/topics/cat), or to a .png file piping them through [`DiagrammeRsvg::export_svg`](https://www.rdocumentation.org/packages/DiagrammeRsvg/topics/export_svg), [`charToRaw`](https://www.rdocumentation.org/packages/base/topics/charToRaw) and [`rsvg::rsvg_png`](https://www.rdocumentation.org/packages/rsvg/topics/rsvg_png).
 
 ``` r
-plot(top_links_dt = TOP_SUPPLIERS,
-     wiot = W, # this is necessary
-     specificNodeOptionsFun =  # this is optional, just to show-off:
-         function(country_sector_dt)
-             ifelse(country_sector_dt$Country=='DEU',
-                    'style=filled, fillcolor=cadetblue1', "")) # GraphViz colour names can be found at:
-                                                               # http://www.graphviz.org/doc/info/colors.html
+plotLinkages(top_links_dt = TOP_SUPPLIERS,
+             wiot = W, # this is necessary
+             specificNodeOptionsFun =  # this is optional, just to show-off:
+                 function(country_sector_dt)
+                     ifelse(country_sector_dt$Country=='DEU',
+                            'style=filled, fillcolor=cadetblue1', "")) # GraphViz colour names can be found at:
+                                                                       # http://www.graphviz.org/doc/info/colors.html
 ```
+
+Click on the picture to zoom in:
 
 ![Graph](https://cdn.rawgit.com/alekrutkowski/wiod.diagrammer/master/Graph.svg)
 
@@ -361,13 +391,13 @@ print(COUNTRIES)
 ``` r
 SECTORS <- sectors(W)
 SECTORS[, SectorLab :=  # truncate the long sector labels just for clarity below
-            substr(SectorLab, 1, 10)]
+            substr(SectorLab, 1, 30)]
 str(SECTORS)
 ```
 
     ## Classes 'data.table' and 'data.frame':   61 obs. of  4 variables:
     ##  $ SectorNr  : int  1 2 3 4 5 6 7 8 9 10 ...
-    ##  $ SectorLab : chr  "Crop and a" "Forestry a" "Fishing an" "Mining and" ...
+    ##  $ SectorLab : chr  "Crop and animal production, hu" "Forestry and logging" "Fishing and aquaculture" "Mining and quarrying" ...
     ##  $ SectorCode: chr  "A01" "A02" "A03" "B" ...
     ##  $ isFinal   : logi  FALSE FALSE FALSE FALSE FALSE FALSE ...
     ##  - attr(*, ".internal.selfref")=<externalptr>
@@ -376,27 +406,27 @@ str(SECTORS)
 head(SECTORS, 20)
 ```
 
-    ##     SectorNr  SectorLab SectorCode isFinal
-    ##  1:        1 Crop and a        A01   FALSE
-    ##  2:        2 Forestry a        A02   FALSE
-    ##  3:        3 Fishing an        A03   FALSE
-    ##  4:        4 Mining and          B   FALSE
-    ##  5:        5 Manufactur    C10-C12   FALSE
-    ##  6:        6 Manufactur    C13-C15   FALSE
-    ##  7:        7 Manufactur        C16   FALSE
-    ##  8:        8 Manufactur        C17   FALSE
-    ##  9:        9 Printing a        C18   FALSE
-    ## 10:       10 Manufactur        C19   FALSE
-    ## 11:       11 Manufactur        C20   FALSE
-    ## 12:       12 Manufactur        C21   FALSE
-    ## 13:       13 Manufactur        C22   FALSE
-    ## 14:       14 Manufactur        C23   FALSE
-    ## 15:       15 Manufactur        C24   FALSE
-    ## 16:       16 Manufactur        C25   FALSE
-    ## 17:       17 Manufactur        C26   FALSE
-    ## 18:       18 Manufactur        C27   FALSE
-    ## 19:       19 Manufactur        C28   FALSE
-    ## 20:       20 Manufactur        C29   FALSE
+    ##     SectorNr                      SectorLab SectorCode isFinal
+    ##  1:        1 Crop and animal production, hu        A01   FALSE
+    ##  2:        2           Forestry and logging        A02   FALSE
+    ##  3:        3        Fishing and aquaculture        A03   FALSE
+    ##  4:        4           Mining and quarrying          B   FALSE
+    ##  5:        5 Manufacture of food products,     C10-C12   FALSE
+    ##  6:        6 Manufacture of textiles, weari    C13-C15   FALSE
+    ##  7:        7 Manufacture of wood and of pro        C16   FALSE
+    ##  8:        8 Manufacture of paper and paper        C17   FALSE
+    ##  9:        9 Printing and reproduction of r        C18   FALSE
+    ## 10:       10 Manufacture of coke and refine        C19   FALSE
+    ## 11:       11 Manufacture of chemicals and c        C20   FALSE
+    ## 12:       12 Manufacture of basic pharmaceu        C21   FALSE
+    ## 13:       13 Manufacture of rubber and plas        C22   FALSE
+    ## 14:       14 Manufacture of other non-metal        C23   FALSE
+    ## 15:       15    Manufacture of basic metals        C24   FALSE
+    ## 16:       16 Manufacture of fabricated meta        C25   FALSE
+    ## 17:       17 Manufacture of computer, elect        C26   FALSE
+    ## 18:       18 Manufacture of electrical equi        C27   FALSE
+    ## 19:       19 Manufacture of machinery and e        C28   FALSE
+    ## 20:       20 Manufacture of motor vehicles,        C29   FALSE
 
 ``` r
 AGGREGATES <- aggregates(W)

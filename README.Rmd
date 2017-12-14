@@ -10,8 +10,9 @@ always_allow_html: yes
 # Rendering this doc:
 # rmarkdown::render(paste0(getwd(),'/README.Rmd'), envir=globalenv())
 knitr::opts_chunk$set(echo = TRUE)
-plot <- function(...) # a trick to plot svg
-    wiod.diagrammer:::plot.SelectedLinksDT(...) %>% 
+library(magrittr)
+plotLinkages <- function(...) # a trick to plot svg
+    wiod.diagrammer::plotLinkages(...) %>% 
     DiagrammeRsvg::export_svg() %>% 
     cat(file='Graph.svg')
 print <- function(d) # Just for clarity
@@ -29,6 +30,10 @@ print <- function(d) # Just for clarity
 # install.packages('devtools')
 devtools::install_github('alekrutkowski/wiod.diagrammer')
 ```
+
+## Documentation
+
+(https://alekrutkowski.github.io/wiod.diagrammer)
 
 ## Example
 
@@ -119,7 +124,7 @@ TOP_CUSTOMERS <-
               flat_wiod = W_flat_noself_truncated,
               start_countries = 'DEU', # We could add here other countries.
               start_sectors = 20, # "Manufacture of motor vehicles, trailers and semi-trailers"
-                                  # We could add here other sectors.
+              # We could add here other sectors.
               ListOfselectionFuns = # As discussed in the text above:
                   list(function(flat_wiod) tieRobustRankLessOrEqual(-flat_wiod$value, 3),  # minus because we
                        function(flat_wiod) tieRobustRankLessOrEqual(-flat_wiod$value, 2),  # want to rank from
@@ -137,7 +142,7 @@ TOP_SUPPLIERS <-
               flat_wiod = W_flat_noself_truncated,
               start_countries = 'DEU', # We could add here other countries.
               start_sectors = 20, # "Manufacture of motor vehicles, trailers and semi-trailers"
-                                  # We could add here other sectors.
+              # We could add here other sectors.
               ListOfselectionFuns = # As discussed in the text above:
                   list(function(flat_wiod) tieRobustRankLessOrEqual(-flat_wiod$value, 3),  # minus because we
                        function(flat_wiod) tieRobustRankLessOrEqual(-flat_wiod$value, 2),  # want to rank from
@@ -163,14 +168,16 @@ or to a .png file piping them through
 [`charToRaw`](https://www.rdocumentation.org/packages/base/topics/charToRaw) and [`rsvg::rsvg_png`](https://www.rdocumentation.org/packages/rsvg/topics/rsvg_png).
 
 ```{r plot, message=FALSE, results='hide'}
-plot(top_links_dt = TOP_SUPPLIERS,
-     wiot = W, # this is necessary
-     specificNodeOptionsFun =  # this is optional, just to show-off:
-         function(country_sector_dt)
-             ifelse(country_sector_dt$Country=='DEU',
-                    'style=filled, fillcolor=cadetblue1', "")) # GraphViz colour names can be found at:
-                                                               # http://www.graphviz.org/doc/info/colors.html
+plotLinkages(top_links_dt = TOP_SUPPLIERS,
+             wiot = W, # this is necessary
+             specificNodeOptionsFun =  # this is optional, just to show-off:
+                 function(country_sector_dt)
+                     ifelse(country_sector_dt$Country=='DEU',
+                            'style=filled, fillcolor=cadetblue1', "")) # GraphViz colour names can be found at:
+                                                                       # http://www.graphviz.org/doc/info/colors.html
 ```
+
+Click on the picture to zoom in:
 
 ![Graph](https://cdn.rawgit.com/alekrutkowski/wiod.diagrammer/master/Graph.svg)
 
@@ -184,7 +191,7 @@ str(COUNTRIES)
 print(COUNTRIES)
 SECTORS <- sectors(W)
 SECTORS[, SectorLab :=  # truncate the long sector labels just for clarity below
-            substr(SectorLab, 1, 10)]
+            substr(SectorLab, 1, 30)]
 str(SECTORS)
 head(SECTORS, 20)
 AGGREGATES <- aggregates(W)

@@ -274,7 +274,7 @@ falseIfNull <- function(x)
 #' }
 #'
 #' @export
-flatWIOD <- function(wiot, rows=seq_len(nrow(wiot)), columns=seq_len(ncol(wiot))) {
+flatWIOD <- function(wiot, rows=seq_len(dim(wiot)[1]), columns=seq_len(dim(wiot)[2])) {
     wiot %>% stopIfNotWIOD
     stopifnot(rows %>% is.numeric,
               columns %>% is.numeric,
@@ -283,11 +283,11 @@ flatWIOD <- function(wiot, rows=seq_len(nrow(wiot)), columns=seq_len(ncol(wiot))
               all(rows>0) | all(columns<0),
               all(columns>0) | all(columns<0))
     wiot2 <-
-        data.table::copy(wiot)[RNr<=56] %>% # removing non-industry rows
-        `if`(rows %=/=% seq_len(nrow(wiot)) | columns %=/=% seq_len(ncol(wiot)),
+        wiot[RNr<=56] %>% # removing non-industry rows
+        `if`(rows %=/=% seq_len(dim(wiot)[1]) | columns %=/=% seq_len(dim(wiot)[2]),
              info(.,'Filtering rows and/or columns...') %>%
-                 `[`(rows[rows<=nrow(wiot2) & abs(rows)<=nrow(wiot2)],
-                     columns[abs(columns)>4 & abs(columns)<=ncol(wiot2)],
+                 `[`(rows[abs(rows) %>% inRange(1,dim(wiot)[1])],
+                     columns[abs(columns) %>% inRange(4,dim(wiot)[2])],
                      with=FALSE), .)
     suppressWarnings(wiot2[, c('IndustryCode','IndustryDescription','TOT') := NULL]) # supprWarn. in case TOT deleted with the `columns` arg.
     message('Reshaping into long/flat format...')
@@ -384,10 +384,10 @@ findPartnersOfPartners <- function(List,
                          start_countries),
              .) %>%
         .[(.[, .I[selectionFun[[1]][[1]](.SD) %>%
-                     `if`(is.logical(.), .,
-                          stop('The selection function does not return a logical (Boolean) vector.\n',
-                               'It returns ',class(.),'.', call.=FALSE))],
-            by = by])$V1] # following https://stackoverflow.com/a/16574176
+                      `if`(is.logical(.), .,
+                           stop('The selection function does not return a logical (Boolean) vector.\n',
+                                'It returns ',class(.),'.', call.=FALSE))],
+             by = by])$V1] # following https://stackoverflow.com/a/16574176
     partners_of_partners <-
         `if`(!isFinalRound,
              top_partners%>%
@@ -408,16 +408,29 @@ findPartnersOfPartners <- function(List,
 allIntegers <- function(numvec)
     all(numvec==as.integer(numvec))
 
-has3letter <- function(dt, colname)
-    colname %in% colnames(dt) %and%
-    (dt[[colname]] %>% is.character) %and%
-    (max(nchar(dt[[colname]]))==3) %and%
-    (min(nchar(dt[[colname]]))==3)
+`%and%` <- function(cond, x)
+    `if`(cond, x, FALSE)
+
+hasNumericColumn <- function(dt, cname)
+    cname %in% colnames(dt) %and%
+    (dt[[cname]] %>% is.numeric)
+
+hasNumericColumnWithOnlyWiodSectorNumbersNamed <- function(dt, cname)
+    dt %>% hasNumericColumn(cname) %and%
+    all(dt[[cname]] %>% inRange(1,61))
+
+hasCharacterColumn <- function(dt, cname)
+    cname %in% colnames(dt) %and%
+    (dt[[cname]] %>% is.character)
+
+has3LetterColumn <- function(dt, cname)
+    dt %>% hasCharacterColumn(cname) %and%
+    (max(nchar(dt[[cname]]))==3) %and%
+    (min(nchar(dt[[cname]]))==3)
 
 areAllFunctionsWith1argument <- function(List)
     List %>%
-    sapply(. %>%
-               isFunctionWith1Argument) %>%
+    sapply(. %>% isFunctionWith1Argument) %>%
     all
 
 #' Find the specific linkages in the WIOD
@@ -483,14 +496,11 @@ findLinks <- function(partners,
               length(partners)==1,
               partners=='suppliers' | partners=='users',
               flat_wiod %>% isDataTable,
-              flat_wiod %>% has3letter('ExpCountry'),
-              flat_wiod %>% has3letter('ImpCountry'),
-              'ImpSectorNr' %in% colnames(flat_wiod),
-              flat_wiod$ImpSectorNr %>% is.numeric,
-              'ExpSectorNr' %in% colnames(flat_wiod),
-              flat_wiod$ExpSectorNr %>% is.numeric,
-              'value' %in% colnames(flat_wiod),
-              flat_wiod$value %>% is.numeric,
+              flat_wiod %>% has3LetterColumn('ExpCountry'),
+              flat_wiod %>% has3LetterColumn('ImpCountry'),
+              flat_wiod %>% hasNumericColumnWithOnlyWiodSectorNumbersNamed('ImpSectorNr'),
+              flat_wiod %>% hasNumericColumnWithOnlyWiodSectorNumbersNamed('ExpSectorNr'),
+              flat_wiod %>% hasNumericColumn('value'),
               start_countries %>% is.character,
               all(start_countries %in% countries()$Country),
               start_sectors %>% is.numeric,
@@ -519,8 +529,7 @@ findLinks <- function(partners,
             lapply(list) %>%
             data.table.(selectionFun = I(.),
                         round = seq_along(.)) %>%
-            split(row.names(.))) $ accum_df %>%
-        `class<-`(c('SelectedLinksDT', class(.)))
+            split(row.names(.))) $ accum_df
 }
 
 

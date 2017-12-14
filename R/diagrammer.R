@@ -80,26 +80,6 @@ stopifnot. <- function(x, expr) # magrittr-pipe-friendly stopifnot
               call.=FALSE),
          x)
 
-`%and%` <- function(cond, x)
-    `if`(cond, x, FALSE)
-
-has3letterCountry <- function(dt)
-    'Country' %in% colnames(dt) %and%
-    (dt$Country %>% is.character) %and%
-    (max(nchar(dt$Country))==3) %and%
-    (min(nchar(dt$Country))==3)
-
-hasWiodSectorNr <- function(dt)
-    'SectorNr' %in% colnames(dt) %and%
-    (dt$SectorNr %>% is.numeric) %and%
-    all(dt$SectorNr >= 1) %and%
-    all(dt$SectorNr <= 73) %and%
-    all(c(63,64) %not.in% dt$SectorNr)
-
-hasCharacterColumn <- function(dt, cname)
-    cname %in% colnames(dt) %and%
-    (dt[[cname]] %>% is.character)
-
 isFunctionWith1Argument <- function(f)
     f %>% is.function %and%
     (numberOfArguments(f)==1)
@@ -245,58 +225,64 @@ collapseAndFormatOptions <- function(charvec)
 #' if \code{gvcode = TRUE}.
 #'
 #' @export
-plot.SelectedLinksDT <- function(top_links_dt,
-                                 wiot,
-                                 units =
-                                     list(units_suffix =
-                                              'bn USD',
-                                          mln_USD_exchange_rate = # should correspond to the units_suffix above
-                                              0.001), # original WIOD in mln USD
-                                 country_labels_dt =
-                                     wiod.diagrammer::countries(),
-                                 sector_labels_dt =
-                                     wiod.diagrammer::sectors(wiot),
-                                 aggregates_dt =
-                                     wiod.diagrammer::aggregates(wiot),
-                                 arrowSizeFun = function(value)
-                                     wiod.diagrammer:::normalise(value)*16 + 1,
-                                 arrowLabelFun =
-                                     identity,
-                                 nodeSizeFun = function(country_sector_dt)
-                                     country_sector_dt %>%
-                                     ifelse.(.$isFinal,
-                                             .$II_fob,
-                                             .$GO),
-                                 nodeSizeTransformFun = function(node_size_val)
-                                     wiod.diagrammer::normalise(log(node_size_val)+1)*8 + 8,
-                                 nodeLabelFun = function(country_sector_dt)
-                                     country_sector_dt %>%
-                                     paste.(.$CountryLab,
-                                            .$SectorLab,
-                                            paste(.$NodeSize %>%
-                                                      numberFormattingFun,
-                                                  units$units_suffix),
-                                            sep=', '),
-                                 specificNodeOptionsFun = function(country_sector_dt)
-                                     ifelse(country_sector_dt$isFinal,
-                                            'fontname="times-italic"', ""),
-                                 specificArrowOptionsFun = function(top_links_dt)
-                                     ifelse(top_links_dt$ExpCountry==top_links_dt$ImpCountry, # domestic flows
-                                            'style=solid', 'style=dashed'),
-                                 general_arrow_options =
-                                     'color=grey',
-                                 general_node_options =
-                                     'shape=box',
-                                 graph_options =
-                                     c('layout=dot','rankdir=LR'),
-                                 numberFormattingFun = function(value)
-                                     value %>%
-                                     formatC(digits=1, format='f',big.mark=' '),
-                                 nchar_wrap =
-                                     30,
-                                 gvcode =
-                                     FALSE) {
-    stopifnot(wiot %>% isWIOD,
+plotLinkages <- function(top_links_dt,
+                         wiot,
+                         units =
+                             list(units_suffix =
+                                      'bn USD',
+                                  mln_USD_exchange_rate = # should correspond to the units_suffix above
+                                      0.001), # original WIOD in mln USD
+                         country_labels_dt =
+                             wiod.diagrammer::countries(),
+                         sector_labels_dt =
+                             wiod.diagrammer::sectors(wiot),
+                         aggregates_dt =
+                             wiod.diagrammer::aggregates(wiot),
+                         arrowSizeFun = function(value)
+                             wiod.diagrammer:::normalise(value)*16 + 1,
+                         arrowLabelFun =
+                             identity,
+                         nodeSizeFun = function(country_sector_dt)
+                             country_sector_dt %>%
+                             ifelse.(.$isFinal,
+                                     .$II_fob,
+                                     .$GO),
+                         nodeSizeTransformFun = function(node_size_val)
+                             wiod.diagrammer::normalise(log(node_size_val)+1)*8 + 8,
+                         nodeLabelFun = function(country_sector_dt)
+                             country_sector_dt %>%
+                             paste.(.$CountryLab,
+                                    .$SectorLab,
+                                    paste(.$NodeSize %>%
+                                              numberFormattingFun,
+                                          units$units_suffix),
+                                    sep=', '),
+                         specificNodeOptionsFun = function(country_sector_dt)
+                             ifelse(country_sector_dt$isFinal,
+                                    'fontname="times-italic"', ""),
+                         specificArrowOptionsFun = function(top_links_dt)
+                             ifelse(top_links_dt$ExpCountry==top_links_dt$ImpCountry, # domestic flows
+                                    'style=solid', 'style=dashed'),
+                         general_arrow_options =
+                             'color=grey',
+                         general_node_options =
+                             'shape=box',
+                         graph_options =
+                             c('layout=dot','rankdir=LR'),
+                         numberFormattingFun = function(value)
+                             value %>%
+                             formatC(digits=1, format='f',big.mark=' '),
+                         nchar_wrap =
+                             30,
+                         gvcode =
+                             FALSE) {
+    stopifnot(top_links_dt %>% isDataTable,
+              top_links_dt %>% has3LetterColumn('ExpCountry'),
+              top_links_dt %>% has3LetterColumn('ImpCountry'),
+              top_links_dt %>% hasNumericColumnWithOnlyWiodSectorNumbersNamed('ImpSectorNr'),
+              top_links_dt %>% hasNumericColumnWithOnlyWiodSectorNumbersNamed('ExpSectorNr'),
+              top_links_dt %>% hasNumericColumn('value'),
+              wiot %>% isWIOD,
               units %>% is.list,
               length(units)==2,
               'units_suffix' %in% names(units),
@@ -304,14 +290,14 @@ plot.SelectedLinksDT <- function(top_links_dt,
               units$units_suffix %>% isString,
               units$mln_USD_exchange_rate %>% isNumericConstant,
               country_labels_dt %>% isDataTable,
-              country_labels_dt %>% has3letterCountry,
+              country_labels_dt %>% has3LetterColumn('Country'),
               country_labels_dt %>% hasCharacterColumn('CountryLab'),
               sector_labels_dt %>% isDataTable,
-              sector_labels_dt %>% hasWiodSectorNr,
+              sector_labels_dt %>% hasNumericColumnWithOnlyWiodSectorNumbersNamed('SectorNr'),
               sector_labels_dt %>% hasCharacterColumn('SectorLab'),
               aggregates_dt %>% isDataTable,
-              aggregates_dt  %>% has3letterCountry,
-              aggregates_dt  %>% hasWiodSectorNr,
+              aggregates_dt  %>% has3LetterColumn('Country'),
+              aggregates_dt  %>% hasNumericColumnWithOnlyWiodSectorNumbersNamed('SectorNr'),
               arrowSizeFun %>% isFunctionWith1Argument,
               arrowLabelFun %>% isFunctionWith1Argument,
               nodeSizeFun %>% isFunctionWith1Argument,

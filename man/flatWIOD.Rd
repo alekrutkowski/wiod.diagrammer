@@ -4,7 +4,8 @@
 \alias{flatWIOD}
 \title{Transform the WIOD data.table into a flat/long data.table}
 \usage{
-flatWIOD(wiot, rows = seq_len(nrow(wiot)), columns = seq_len(ncol(wiot)))
+flatWIOD(wiot, rows = seq_len(dim(wiot)[1]),
+  columns = seq_len(dim(wiot)[2]))
 }
 \arguments{
 \item{wiot}{WIOD data.table returned by \code{\link[wiod.diagrammer]{loadWIOD}}}
