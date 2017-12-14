@@ -26,13 +26,6 @@ Load WIOD data for a given year from an official WIOD .Rdata file (release 2016)
 library(wiod.diagrammer)
 ```
 
-    ## 
-    ## Attaching package: 'wiod.diagrammer'
-
-    ## The following object is masked _by_ '.GlobalEnv':
-    ## 
-    ##     plotLinks
-
 ``` r
 W <- loadWIOD('WIOT2014_October16_ROW.RData')
 ```

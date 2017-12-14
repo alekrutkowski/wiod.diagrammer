@@ -11,17 +11,6 @@ always_allow_html: yes
 # rmarkdown::render(paste0(getwd(),'/README.Rmd'), envir=globalenv())
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(engine = 'R')
-library(magrittr)
-plotLinks <- function(...) # a trick to plot svg
-    wiod.diagrammer::plotLinks(...) %>% 
-    DiagrammeRsvg::export_svg() %>% 
-    cat(file='Graph.svg')
-print <- function(d) # Just for clarity
-    `if`(d %>% is.data.frame,
-         base::print.data.frame(`colnames<-`(d, paste0(colnames(d),'  ')),
-                                right=FALSE,
-                                row.names=FALSE),
-         base::print.default(d))
 ```
 
 ## Installation
@@ -43,8 +32,22 @@ Load WIOD data for a given year from an official WIOD .Rdata file
 http://www.wiod.org/protected3/data16/wiot_ROW/wiot_r_Nov16.zip
 and extracted (unzipped).
 
-```{r library, warning=FALSE}
+```{r library, warning=FALSE, message=FALSE}
 library(wiod.diagrammer)
+```
+
+```{r rmd_helpers, include=FALSE}
+library(magrittr)
+plotLinks <- function(...) # a trick to plot svg
+    wiod.diagrammer::plotLinks(...) %>% 
+    DiagrammeRsvg::export_svg() %>% 
+    cat(file='Graph.svg')
+print <- function(d) # Just for clarity
+    `if`(d %>% is.data.frame,
+         base::print.data.frame(`colnames<-`(d, paste0(colnames(d),'  ')),
+                                right=FALSE,
+                                row.names=FALSE),
+         base::print.default(d))
 ```
 
 ```{r load, cache=TRUE}
