@@ -31,7 +31,7 @@ library(wiod.diagrammer)
 
     ## The following object is masked _by_ '.GlobalEnv':
     ## 
-    ##     plotLinkages
+    ##     plotLinks
 
 ``` r
 W <- loadWIOD('WIOT2014_October16_ROW.RData')
@@ -311,20 +311,20 @@ Now, let's plot the "upstream" linkages, making all the German sectors blue. By 
 In `wiod.diagrammer` the rendering of the plot is done internally by [`DiagrammeR::grViz`](https://www.rdocumentation.org/packages/DiagrammeR/topics/grViz). The plots can be saved manually in RStudio, or programmatically e.g. to an .svg file via [`DiagrammeRsvg::export_svg`](https://www.rdocumentation.org/packages/DiagrammeRsvg/topics/export_svg) to a character vector and then [`cat`ed](https://www.rdocumentation.org/packages/base/topics/cat), or to a .png file piping them through [`DiagrammeRsvg::export_svg`](https://www.rdocumentation.org/packages/DiagrammeRsvg/topics/export_svg), [`charToRaw`](https://www.rdocumentation.org/packages/base/topics/charToRaw) and [`rsvg::rsvg_png`](https://www.rdocumentation.org/packages/rsvg/topics/rsvg_png).
 
 ``` r
-plotLinkages(top_links_dt = TOP_SUPPLIERS,
-             wiot = W, # this is necessary
-             specificNodeOptionsFun =  # this is optional, just to show-off:
-                 function(country_sector_dt)
-                     ifelse(country_sector_dt$Country=='DEU',
-                            'style=filled, fillcolor=cadetblue1', "")) # GraphViz colour names can be found at:
-                                                                       # http://www.graphviz.org/doc/info/colors.html
+plotLinks(top_links_dt = TOP_SUPPLIERS,
+          wiot = W, # this is necessary
+          specificNodeOptionsFun =  # this is optional, just to show-off:
+            function(country_sector_dt)
+                ifelse(country_sector_dt$Country=='DEU',
+                       'style=filled, fillcolor=cadetblue1', "")) # GraphViz colour names can be found at:
+                                                                  # http://www.graphviz.org/doc/info/colors.html
 ```
 
 Click on the picture to zoom in:
 
 ![Graph](https://cdn.rawgit.com/alekrutkowski/wiod.diagrammer/master/Graph.svg)
 
-What else is available in the package? The functions which produce auxiliary `data.table`s (that are used by `wiod.diagrammer`s `plot` function if evaluated with default argument values).
+What else is available in the package? The functions which produce auxiliary `data.table`s (that are used by `wiod.diagrammer`'s `plotLinks` function if evaluated with default argument values).
 
 ``` r
 COUNTRIES <- countries() # NB: no argument to function `countries`

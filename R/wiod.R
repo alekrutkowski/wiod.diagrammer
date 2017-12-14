@@ -18,6 +18,7 @@ NULL
 #' @export
 loadWIOD <- function(file_name='WIOT2014_October16_ROW.RData') {
     message('Loading ',quo(file_name),'...')
+	stopifnot(file.exists(file_name))
     load(file_name)
     wiot # check if the object exists
     `wiot column names` <- colnames(wiot)
@@ -461,7 +462,7 @@ areAllFunctionsWith1argument <- function(List)
 #' or exporting country and sector (when extracting customers).
 #'
 #' @return A \code{\link[data.table]{data.table}} (with added S3 class 'SelectedLinksDT' with
-#' a corresponding \code{\link[wiod.diagrammer]{plot}} implementation) with the same columns
+#' a corresponding \code{\link[wiod.diagrammer]{plotLinks}} implementation) with the same columns
 #' as in \code{flat_wiod} (but ordered differently), with only those rows that represent
 #' the top direct and (possibly) indirect linkages.
 #'

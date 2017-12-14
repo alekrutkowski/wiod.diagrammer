@@ -10,9 +10,10 @@ always_allow_html: yes
 # Rendering this doc:
 # rmarkdown::render(paste0(getwd(),'/README.Rmd'), envir=globalenv())
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(engine = 'R')
 library(magrittr)
-plotLinkages <- function(...) # a trick to plot svg
-    wiod.diagrammer::plotLinkages(...) %>% 
+plotLinks <- function(...) # a trick to plot svg
+    wiod.diagrammer::plotLinks(...) %>% 
     DiagrammeRsvg::export_svg() %>% 
     cat(file='Graph.svg')
 print <- function(d) # Just for clarity
@@ -168,13 +169,13 @@ or to a .png file piping them through
 [`charToRaw`](https://www.rdocumentation.org/packages/base/topics/charToRaw) and [`rsvg::rsvg_png`](https://www.rdocumentation.org/packages/rsvg/topics/rsvg_png).
 
 ```{r plot, message=FALSE, results='hide'}
-plotLinkages(top_links_dt = TOP_SUPPLIERS,
-             wiot = W, # this is necessary
-             specificNodeOptionsFun =  # this is optional, just to show-off:
-                 function(country_sector_dt)
-                     ifelse(country_sector_dt$Country=='DEU',
-                            'style=filled, fillcolor=cadetblue1', "")) # GraphViz colour names can be found at:
-                                                                       # http://www.graphviz.org/doc/info/colors.html
+plotLinks(top_links_dt = TOP_SUPPLIERS,
+		  wiot = W, # this is necessary
+		  specificNodeOptionsFun =  # this is optional, just to show-off:
+		  	function(country_sector_dt)
+		  		ifelse(country_sector_dt$Country=='DEU',
+		  			   'style=filled, fillcolor=cadetblue1', "")) # GraphViz colour names can be found at:
+                                                                  # http://www.graphviz.org/doc/info/colors.html
 ```
 
 Click on the picture to zoom in:
@@ -182,7 +183,7 @@ Click on the picture to zoom in:
 ![Graph](https://cdn.rawgit.com/alekrutkowski/wiod.diagrammer/master/Graph.svg)
 
 What else is available in the package? The functions which produce
-auxiliary `data.table`s (that are used by `wiod.diagrammer`s `plot`
+auxiliary `data.table`s (that are used by `wiod.diagrammer`'s `plotLinks`
 function if evaluated with default argument values).
 
 ```{r whatElse1}

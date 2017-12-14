@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Plot a diagram (directed graph) of top linkages — plotLinkages â€¢ wiod.diagrammer</title>
+<title>Plot a diagram (directed graph) of top linkages — plotLinks â€¢ wiod.diagrammer</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -82,7 +82,7 @@
     <p>Plot a diagram (directed graph) of top linkages</p>
     
 
-    <pre class="usage"><span class='fu'>plotLinkages</span>(<span class='no'>top_links_dt</span>, <span class='no'>wiot</span>, <span class='kw'>units</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>units_suffix</span> <span class='kw'>=</span> <span class='st'>"bn USD"</span>,
+    <pre class="usage"><span class='fu'>plotLinks</span>(<span class='no'>top_links_dt</span>, <span class='no'>wiot</span>, <span class='kw'>units</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>units_suffix</span> <span class='kw'>=</span> <span class='st'>"bn USD"</span>,
   <span class='kw'>mln_USD_exchange_rate</span> <span class='kw'>=</span> <span class='fl'>0.001</span>),
   <span class='kw'>country_labels_dt</span> <span class='kw'>=</span> <span class='kw pkg'>wiod.diagrammer</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/wiod.diagrammer/topics/countries'>countries</a></span>(),
   <span class='kw'>sector_labels_dt</span> <span class='kw'>=</span> <span class='kw pkg'>wiod.diagrammer</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/wiod.diagrammer/topics/sectors'>sectors</a></span>(<span class='no'>wiot</span>),
@@ -110,7 +110,7 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>top_links_dt</th>
-      <td><p>A data.table returned by <code>topLinks</code></p></td>
+      <td><p>A data.table returned by <code><a href='findLinks.html'>findLinks</a></code></p></td>
     </tr>
     <tr>
       <th>wiot</th>

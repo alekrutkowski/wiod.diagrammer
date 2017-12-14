@@ -36,7 +36,7 @@ or exporting country and sector (when extracting customers).}
 }
 \value{
 A \code{\link[data.table]{data.table}} (with added S3 class 'SelectedLinksDT' with
-a corresponding \code{\link[wiod.diagrammer]{plot}} implementation) with the same columns
+a corresponding \code{\link[wiod.diagrammer]{plotLinks}} implementation) with the same columns
 as in \code{flat_wiod} (but ordered differently), with only those rows that represent
 the top direct and (possibly) indirect linkages.
 

@@ -1,7 +1,7 @@
 Package: wiod.diagrammer
 Type: Package
 Title: Easy work with WIOD (the 2016 release) including diagramming (flowcharts)
-Version: 0.2.0
+Version: 0.3.0
 Author: Aleksander Rutkowski
 Maintainer: Aleksander Rutkowski <alek.rutkowski@gmail.com>
 Authors@R: person("Aleksander", "Rutkowski", role = c("aut", "cre"), email = "alek.rutkowski@gmail.com")
