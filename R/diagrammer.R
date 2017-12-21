@@ -2,8 +2,8 @@
 NULL
 
 quo <- function(charvec)
-	charvec %>%
-	paste0('"',.,'"')
+    charvec %>%
+    paste0('"',.,'"')
 
 
 #' Rescale values to the [0,1] range
@@ -31,83 +31,104 @@ quo <- function(charvec)
 #' #  5.82  1.0000000
 #' @export
 normalise <- function(numvec) {
-	stopifnot(numvec %>% is.numeric)
-	min <- min(numvec, na.rm=TRUE)
-	spread <- max(numvec, na.rm=TRUE) - min
-	(numvec - min)/spread
+    stopifnot(numvec %>% is.numeric)
+    min <- min(numvec, na.rm=TRUE)
+    spread <- max(numvec, na.rm=TRUE) - min
+    (numvec - min)/spread
 }
 
 formatOptions <- function(...)
-	paste(..., sep=',') %>%
-	gsub('(,)+', ",", .) %>% # to avoid empty spaces between commas for empty strings
-	paste0('[',.,']') %>%
-	sub('[,',
-		'[',.,fixed=TRUE) %>% # to avoid the initial empty space before comma
-	sub(',]',
-		']',.,fixed=TRUE) # to avoid the final empty space after comma
+    paste(..., sep=',') %>%
+    gsub('(,)+', ",", .) %>% # to avoid empty spaces between commas for empty strings
+    paste0('[',.,']') %>%
+    sub('[,',
+        '[',.,fixed=TRUE) %>% # to avoid the initial empty space before comma
+    sub(',]',
+        ']',.,fixed=TRUE) # to avoid the final empty space after comma
 
 isString <- function(s)
-	is.character(s) & length(s)==1
+    is.character(s) & length(s)==1
 
 isNumericConstant <- function(n)
-	n %>% is.numeric &
-	length(n)==1
+    n %>% is.numeric &
+    length(n)==1
 
 numberOfArguments <- function(f)
-	f %>% formals %>% length
+    f %>% formals %>% length
 
 ifelse. <- function(x, ...) # magrittr-pipe-friendly ifelse
-	ifelse(...)
+    ifelse(...)
 
 paste. <- function(x, ...) # magrittr-pipe-friendly paste
-	paste(...)
+    paste(...)
 
 asLabel <- function(charvec)
-	charvec %>%
-	quo %>%
-	paste0('label=',.)
+    charvec %>%
+    quo %>%
+    paste0('label=',.)
 
 wrapText <- function(charvec, numofchars)
-	charvec %>%
-	strwrap(numofchars, simplify=FALSE) %>%
-	sapply(paste, collapse='\\n')
+    charvec %>%
+    strwrap(numofchars, simplify=FALSE) %>%
+    sapply(paste, collapse='\\n')
 
 isDataTable <- data.table::is.data.table
 
 stopifnot. <- function(x, expr) # magrittr-pipe-friendly stopifnot
-	`if`(!expr,
-		 stop(deparse(bquote(.(substitute(expr)))),
-		 	 call.=FALSE),
-		 x)
+    `if`(!expr,
+         stop(deparse(bquote(.(substitute(expr)))),
+              call.=FALSE),
+         x)
 
 isFunctionWith1Argument <- function(f)
-	f %>% is.function %and%
-	(numberOfArguments(f)==1)
+    f %>% is.function %and%
+    (numberOfArguments(f)==1)
 
 evalAndCheck <- function(val, fname, e, testf, ...)
-	get(fname, envir=e)(val, ...) %>%
-	`if`(!testf(.),
-		 stop('The value returned (`vr`) by the function `',fname,'`\n',
-		 	 'does not satisfy the following condition:\n',
-		 	 capture.output(body(testf)),'\n',
-		 	 capture.output(cat('The structure of `vr` is:')),'\n',
-		 	 capture.output(str(.)),'\n',
-		 	 call.=FALSE),
-		 .)
+    get(fname, envir=e)(val, ...) %>%
+    `if`(!testf(.),
+         stop('The value returned (`vr`) by the function `',fname,'`\n',
+              'does not satisfy the following condition:\n',
+              capture.output(body(testf)),'\n',
+              capture.output(cat('The structure of `vr` is:')),'\n',
+              capture.output(str(.)),'\n',
+              call.=FALSE),
+         .)
+
+reduceUntilNoChange <- function(FUN, init) {
+    result <- FUN(init)
+    repeat {
+        previous <- result
+        result <- FUN(previous)
+        if (identical(previous, result)) break
+    }
+    result
+}
+
+nextKeyValuePairOrFullString <- function(charvec)
+    # All Graphviz attributes are specified by name-value pairs (separated by =)
+    # http://www.graphviz.org/doc/info/attrs.html
+    sub('^[ ]*,[ ]*([_[:alpha:]]+[ ]*=[ ]*(".*"|-?[0-9]+(\\.[0-9])*|-?[0-9]*\\.[0-9]+|[_[:alpha:]0-9]+))(.*)$',
+        '\\4', charvec)
 
 containsGraphVizAttributes <- function(x)
-	x %>% is.character %and%
-	(x %>%
-	 	trimws %>%
-	 	sapply(. %>% # All Graphviz attributes are specified by name-value pairs (separated by =)
-	 		   	# http://www.graphviz.org/doc/info/attrs.html
-	 	{grepl(paste0('^[_[:alpha:]]+[ ]*\\=.+$'),.) | .==""}) %>%
-	 	all)
+    x %>% is.character %and%
+    (x %>%
+         paste0(',',.) %>%
+         reduceUntilNoChange(nextKeyValuePairOrFullString,
+                             .) %>%
+         trimws %>%
+         `!=`("") %>%
+         {`if`(any(.),
+               stop('One or more strings are not GraphViz attributes:\n',
+                    x[.] %>% paste(collapse='\n'),
+                    call.=FALSE),
+               TRUE)})
 
 collapseAndFormatOptions <- function(charvec)
-	charvec %>%
-	paste(collapse=',') %>%
-	formatOptions
+    charvec %>%
+    paste(collapse=',') %>%
+    formatOptions
 
 #' Plot a diagram (directed graph) of top linkages
 #'
@@ -226,156 +247,156 @@ collapseAndFormatOptions <- function(charvec)
 #'
 #' @export
 plotLinks <- function(top_links_dt,
-					  wiot,
-					  units =
-					  	list(units_suffix =
-					  		 	'bn USD',
-					  		 mln_USD_exchange_rate = # should correspond to the units_suffix above
-					  		 	0.001), # original WIOD in mln USD
-					  country_labels_dt =
-					  	wiod.diagrammer::countries(),
-					  sector_labels_dt =
-					  	wiod.diagrammer::sectors(wiot),
-					  aggregates_dt =
-					  	wiod.diagrammer::aggregates(wiot),
-					  arrowSizeFun = function(value)
-					  	wiod.diagrammer:::normalise(value)*16 + 1,
-					  arrowLabelFun =
-					  	identity,
-					  nodeSizeFun = function(country_sector_dt)
-					  	country_sector_dt %>%
-					  	ifelse.(.$isFinal,
-					  			.$II_fob,
-					  			.$GO),
-					  nodeSizeTransformFun = function(node_size_val)
-					  	wiod.diagrammer::normalise(log(node_size_val)+1)*8 + 8,
-					  nodeLabelFun = function(country_sector_dt)
-					  	country_sector_dt %>%
-					  	paste.(.$CountryLab,
-					  		   .$SectorLab,
-					  		   paste(.$NodeSize %>%
-					  		   	  	numberFormattingFun,
-					  		   	  units$units_suffix),
-					  		   sep=', '),
-					  specificNodeOptionsFun = function(country_sector_dt)
-					  	ifelse(country_sector_dt$isFinal,
-					  		   'fontname="times-italic"', ""),
-					  specificArrowOptionsFun = function(top_links_dt)
-					  	ifelse(top_links_dt$ExpCountry==top_links_dt$ImpCountry, # domestic flows
-					  		   'style=solid', 'style=dashed'),
-					  general_arrow_options =
-					  	'color=grey',
-					  general_node_options =
-					  	'shape=box',
-					  graph_options =
-					  	c('layout=dot','rankdir=LR'),
-					  numberFormattingFun = function(value)
-					  	value %>%
-					  	formatC(digits=1, format='f',big.mark=' '),
-					  nchar_wrap =
-					  	30,
-					  gvcode =
-					  	FALSE) {
-	stopifnot(top_links_dt %>% isDataTable,
-			  top_links_dt %>% has3LetterColumn('ExpCountry'),
-			  top_links_dt %>% has3LetterColumn('ImpCountry'),
-			  top_links_dt %>% hasNumericColumnWithOnlyWiodSectorNumbersNamed('ImpSectorNr'),
-			  top_links_dt %>% hasNumericColumnWithOnlyWiodSectorNumbersNamed('ExpSectorNr'),
-			  top_links_dt %>% hasNumericColumn('value'),
-			  wiot %>% isWIOD,
-			  units %>% is.list,
-			  length(units)==2,
-			  'units_suffix' %in% names(units),
-			  'mln_USD_exchange_rate' %in% names(units),
-			  units$units_suffix %>% isString,
-			  units$mln_USD_exchange_rate %>% isNumericConstant,
-			  country_labels_dt %>% isDataTable,
-			  country_labels_dt %>% has3LetterColumn('Country'),
-			  country_labels_dt %>% hasCharacterColumn('CountryLab'),
-			  sector_labels_dt %>% isDataTable,
-			  sector_labels_dt %>% hasNumericColumnWithOnlyWiodSectorNumbersNamed('SectorNr'),
-			  sector_labels_dt %>% hasCharacterColumn('SectorLab'),
-			  aggregates_dt %>% isDataTable,
-			  aggregates_dt  %>% has3LetterColumn('Country'),
-			  aggregates_dt  %>% hasNumericColumnWithOnlyWiodSectorNumbersNamed('SectorNr'),
-			  arrowSizeFun %>% isFunctionWith1Argument,
-			  arrowLabelFun %>% isFunctionWith1Argument,
-			  nodeSizeFun %>% isFunctionWith1Argument,
-			  nodeSizeTransformFun %>% isFunctionWith1Argument,
-			  nodeLabelFun %>% isFunctionWith1Argument,
-			  specificNodeOptionsFun %>% isFunctionWith1Argument,
-			  specificArrowOptionsFun %>% isFunctionWith1Argument,
-			  general_arrow_options %>% containsGraphVizAttributes,
-			  general_node_options %>% containsGraphVizAttributes,
-			  graph_options %>% containsGraphVizAttributes,
-			  gvcode %>% is.logical,
-			  length(gvcode)==1)
-	message('Preparing arrows...')
-	E <- environment()
-	arrows <-
-		top_links_dt %>%
-		paste.(paste0(.$ExpCountry,.$ExpSectorNr),
-			   '->',
-			   paste0(.$ImpCountry,.$ImpSectorNr),
-			   formatOptions((.$value*units$mln_USD_exchange_rate) %>%
-			   			  	evalAndCheck('numberFormattingFun', E,
-			   			  				 function(vr) vr %>% is.character) %>%
-			   			  	paste(units$units_suffix) %>%
-			   			  	evalAndCheck('arrowLabelFun', E,
-			   			  				 function(vr) vr %>% is.character) %>%
-			   			  	asLabel,
-			   			  .$value %>%
-			   			  	evalAndCheck('arrowSizeFun', E,
-			   			  				 function(vr) vr %>% is.numeric) %>%
-			   			  	paste0('penwidth=',.),
-			   			  evalAndCheck(., 'specificArrowOptionsFun', E,
-			   			  			 function(vr) vr %>% containsGraphVizAttributes)))
-	message('Preparing nodes...')
-	nodes <-
-		top_links_dt %>%
-		{rbind(.[, list(ExpCountry, ExpSectorNr)] %>%
-			   	data.table::setnames(c('ExpCountry', 'ExpSectorNr'),
-			   						 c('Country', 'SectorNr')),
-			   .[, list(ImpCountry, ImpSectorNr)] %>%
-			   	data.table::setnames(c('ImpCountry', 'ImpSectorNr'),
-			   						 c('Country', 'SectorNr')))} %>%
-		unique %>%
-		merge(aggregates_dt,
-			  by=c('Country','SectorNr')) %>%
-		merge(country_labels_dt,
-			  by='Country') %>%
-		merge(sector_labels_dt,
-			  by='SectorNr') %>%
-		`[`(, NodeSize :=
-				evalAndCheck(., 'nodeSizeFun', E,
-							 function(vr) vr %>% is.numeric)*
-				units$mln_USD_exchange_rate) %>%
-		`[`(, NodeSizeTransformed :=
-				NodeSize %>%
-				evalAndCheck('nodeSizeTransformFun', E,
-							 function(vr) vr %>% is.numeric)) %>%
-		`[`(, NodeLabel :=
-				evalAndCheck(., 'nodeLabelFun', E,
-							 function(vr) vr %>% is.character)) %>%
-		paste.(paste0(.$Country,.$SectorNr),
-			   formatOptions(.$NodeLabel %>%
-			   			  	wrapText(nchar_wrap) %>%
-			   			  	asLabel,
-			   			  .$NodeSizeTransformed %>%
-			   			  	paste0('fontsize=',.),
-			   			  evalAndCheck(., 'specificNodeOptionsFun', E,
-			   			  			 function(vr) vr %>% containsGraphVizAttributes)))
-	message('Preparing the graph...')
-	c('digraph graphname {',
-	  paste('graph', graph_options %>% collapseAndFormatOptions),
-	  paste('node', general_node_options %>% collapseAndFormatOptions),
-	  paste('edge', general_arrow_options %>% collapseAndFormatOptions),
-	  arrows,
-	  nodes,
-	  '}') %>%
-		paste(collapse='\n') %>%
-		`if`(gvcode,
-			 .,
-			 DiagrammeR::grViz(.))
+                      wiot,
+                      units =
+                          list(units_suffix =
+                                   'bn USD',
+                               mln_USD_exchange_rate = # should correspond to the units_suffix above
+                                   0.001), # original WIOD in mln USD
+                      country_labels_dt =
+                          wiod.diagrammer::countries(),
+                      sector_labels_dt =
+                          wiod.diagrammer::sectors(wiot),
+                      aggregates_dt =
+                          wiod.diagrammer::aggregates(wiot),
+                      arrowSizeFun = function(value)
+                          wiod.diagrammer:::normalise(value)*16 + 1,
+                      arrowLabelFun =
+                          identity,
+                      nodeSizeFun = function(country_sector_dt)
+                          country_sector_dt %>%
+                          ifelse.(.$isFinal,
+                                  .$II_fob,
+                                  .$GO),
+                      nodeSizeTransformFun = function(node_size_val)
+                          wiod.diagrammer::normalise(log(node_size_val)+1)*8 + 8,
+                      nodeLabelFun = function(country_sector_dt)
+                          country_sector_dt %>%
+                          paste.(.$CountryLab,
+                                 .$SectorLab,
+                                 paste(.$NodeSize %>%
+                                           numberFormattingFun,
+                                       units$units_suffix),
+                                 sep=', '),
+                      specificNodeOptionsFun = function(country_sector_dt)
+                          ifelse(country_sector_dt$isFinal,
+                                 'fontname="times-italic"', ""),
+                      specificArrowOptionsFun = function(top_links_dt)
+                          ifelse(top_links_dt$ExpCountry==top_links_dt$ImpCountry, # domestic flows
+                                 'style=solid', 'style=dashed'),
+                      general_arrow_options =
+                          'color=grey',
+                      general_node_options =
+                          'shape=box',
+                      graph_options =
+                          c('layout=dot','rankdir=LR'),
+                      numberFormattingFun = function(value)
+                          value %>%
+                          formatC(digits=1, format='f',big.mark=' '),
+                      nchar_wrap =
+                          30,
+                      gvcode =
+                          FALSE) {
+    stopifnot(top_links_dt %>% isDataTable,
+              top_links_dt %>% has3LetterColumn('ExpCountry'),
+              top_links_dt %>% has3LetterColumn('ImpCountry'),
+              top_links_dt %>% hasNumericColumnWithOnlyWiodSectorNumbersNamed('ImpSectorNr'),
+              top_links_dt %>% hasNumericColumnWithOnlyWiodSectorNumbersNamed('ExpSectorNr'),
+              top_links_dt %>% hasNumericColumn('value'),
+              wiot %>% isWIOD,
+              units %>% is.list,
+              length(units)==2,
+              'units_suffix' %in% names(units),
+              'mln_USD_exchange_rate' %in% names(units),
+              units$units_suffix %>% isString,
+              units$mln_USD_exchange_rate %>% isNumericConstant,
+              country_labels_dt %>% isDataTable,
+              country_labels_dt %>% has3LetterColumn('Country'),
+              country_labels_dt %>% hasCharacterColumn('CountryLab'),
+              sector_labels_dt %>% isDataTable,
+              sector_labels_dt %>% hasNumericColumnWithOnlyWiodSectorNumbersNamed('SectorNr'),
+              sector_labels_dt %>% hasCharacterColumn('SectorLab'),
+              aggregates_dt %>% isDataTable,
+              aggregates_dt  %>% has3LetterColumn('Country'),
+              aggregates_dt  %>% hasNumericColumnWithOnlyWiodSectorNumbersNamed('SectorNr'),
+              arrowSizeFun %>% isFunctionWith1Argument,
+              arrowLabelFun %>% isFunctionWith1Argument,
+              nodeSizeFun %>% isFunctionWith1Argument,
+              nodeSizeTransformFun %>% isFunctionWith1Argument,
+              nodeLabelFun %>% isFunctionWith1Argument,
+              specificNodeOptionsFun %>% isFunctionWith1Argument,
+              specificArrowOptionsFun %>% isFunctionWith1Argument,
+              general_arrow_options %>% containsGraphVizAttributes,
+              general_node_options %>% containsGraphVizAttributes,
+              graph_options %>% containsGraphVizAttributes,
+              gvcode %>% is.logical,
+              length(gvcode)==1)
+    message('Preparing arrows...')
+    E <- environment()
+    arrows <-
+        top_links_dt %>%
+        paste.(paste0(.$ExpCountry,.$ExpSectorNr),
+               '->',
+               paste0(.$ImpCountry,.$ImpSectorNr),
+               formatOptions((.$value*units$mln_USD_exchange_rate) %>%
+                                 evalAndCheck('numberFormattingFun', E,
+                                              function(vr) vr %>% is.character) %>%
+                                 paste(units$units_suffix) %>%
+                                 evalAndCheck('arrowLabelFun', E,
+                                              function(vr) vr %>% is.character) %>%
+                                 asLabel,
+                             .$value %>%
+                                 evalAndCheck('arrowSizeFun', E,
+                                              function(vr) vr %>% is.numeric) %>%
+                                 paste0('penwidth=',.),
+                             evalAndCheck(., 'specificArrowOptionsFun', E,
+                                          function(vr) vr %>% containsGraphVizAttributes)))
+    message('Preparing nodes...')
+    nodes <-
+        top_links_dt %>%
+        {rbind(.[, list(ExpCountry, ExpSectorNr)] %>%
+                   data.table::setnames(c('ExpCountry', 'ExpSectorNr'),
+                                        c('Country', 'SectorNr')),
+               .[, list(ImpCountry, ImpSectorNr)] %>%
+                   data.table::setnames(c('ImpCountry', 'ImpSectorNr'),
+                                        c('Country', 'SectorNr')))} %>%
+        unique %>%
+        merge(aggregates_dt,
+              by=c('Country','SectorNr')) %>%
+        merge(country_labels_dt,
+              by='Country') %>%
+        merge(sector_labels_dt,
+              by='SectorNr') %>%
+        `[`(, NodeSize :=
+                evalAndCheck(., 'nodeSizeFun', E,
+                             function(vr) vr %>% is.numeric)*
+                units$mln_USD_exchange_rate) %>%
+        `[`(, NodeSizeTransformed :=
+                NodeSize %>%
+                evalAndCheck('nodeSizeTransformFun', E,
+                             function(vr) vr %>% is.numeric)) %>%
+        `[`(, NodeLabel :=
+                evalAndCheck(., 'nodeLabelFun', E,
+                             function(vr) vr %>% is.character)) %>%
+        paste.(paste0(.$Country,.$SectorNr),
+               formatOptions(.$NodeLabel %>%
+                                 wrapText(nchar_wrap) %>%
+                                 asLabel,
+                             .$NodeSizeTransformed %>%
+                                 paste0('fontsize=',.),
+                             evalAndCheck(., 'specificNodeOptionsFun', E,
+                                          function(vr) vr %>% containsGraphVizAttributes)))
+    message('Preparing the graph...')
+    c('digraph graphname {',
+      paste('graph', graph_options %>% collapseAndFormatOptions),
+      paste('node', general_node_options %>% collapseAndFormatOptions),
+      paste('edge', general_arrow_options %>% collapseAndFormatOptions),
+      arrows,
+      nodes,
+      '}') %>%
+        paste(collapse='\n') %>%
+        `if`(gvcode,
+             .,
+             DiagrammeR::grViz(.))
 }
 

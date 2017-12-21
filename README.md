@@ -1,7 +1,7 @@
 wiod.diagrammer -- R package for an easy work with WIOD (the 2016 release) including diagramming (flowcharts)
 ================
 Aleksander Rutkowski
-2017-12-14
+2017-12-21
 
 Installation
 ------------
@@ -310,6 +310,12 @@ plotLinks(top_links_dt = TOP_SUPPLIERS,
             function(country_sector_dt)
                 ifelse(country_sector_dt$Country=='DEU',
                        'style=filled, fillcolor=cadetblue1', "")) # GraphViz colour names can be found at:
+```
+
+    ## Warning: replacing previous import 'scales::viridis_pal' by
+    ## 'viridis::viridis_pal' when loading 'DiagrammeR'
+
+``` r
                                                                   # http://www.graphviz.org/doc/info/colors.html
 ```
 
