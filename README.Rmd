@@ -171,7 +171,7 @@ or to a .png file piping them through
 [`DiagrammeRsvg::export_svg`](https://www.rdocumentation.org/packages/DiagrammeRsvg/topics/export_svg),
 [`charToRaw`](https://www.rdocumentation.org/packages/base/topics/charToRaw) and [`rsvg::rsvg_png`](https://www.rdocumentation.org/packages/rsvg/topics/rsvg_png).
 
-```{r plot, message=FALSE, results='hide'}
+```{r plot, message=FALSE, results='hide', warning=FALSE}
 plotLinks(top_links_dt = TOP_SUPPLIERS,
 		  wiot = W, # this is necessary
 		  specificNodeOptionsFun =  # this is optional, just to show-off:

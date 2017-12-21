@@ -310,12 +310,6 @@ plotLinks(top_links_dt = TOP_SUPPLIERS,
             function(country_sector_dt)
                 ifelse(country_sector_dt$Country=='DEU',
                        'style=filled, fillcolor=cadetblue1', "")) # GraphViz colour names can be found at:
-```
-
-    ## Warning: replacing previous import 'scales::viridis_pal' by
-    ## 'viridis::viridis_pal' when loading 'DiagrammeR'
-
-``` r
                                                                   # http://www.graphviz.org/doc/info/colors.html
 ```
 
