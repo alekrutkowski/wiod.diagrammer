@@ -118,7 +118,7 @@ containsGraphVizAttributes <- function(x)
          reduceUntilNoChange(nextKeyValuePairOrFullString,
                              .) %>%
          trimws %>%
-         `!=`("") %>%
+         {.!="" & .!=","} %>%
          {`if`(any(.),
                stop('One or more strings are not GraphViz attributes:\n',
                     x[.] %>% paste(collapse='\n'),
