@@ -109,13 +109,18 @@ see ** with 'edge' highlighted in
 the 'COMPONENTS' section. Default: \code{'style=solid'} for the domestic flows and
 'style=dashed' for the international flows.}
 
-\item{general_arrow_options}{Optional: a character vector with the GraphViz's edge
-attributes of all the arrows (edges)*. Default: \code{'color=grey'}.}
+\item{general_arrow_options}{Optional: a character constant (vector of length 1) with the GraphViz's edge
+global attributes* of all the arrows (edges)
+see ** with 'edge' highlighted in
+the 'COMPONENTS' section. . Default: \code{'color=grey'}.}
 
-\item{general_node_options}{Optional: a character vector with the GraphViz's node
-attributes of all the nodes (country-sector boxes)*. Default: \code{'shape=box'}.}
+\item{general_node_options}{Optional: a character constant (vector of length 1) with the GraphViz's edge
+global attributes* of all the nodes (country-sector boxes)
+see ** with 'node' highlighted in
+the 'COMPONENTS' section. Default: \code{'shape=box'}.}
 
-\item{graph_options}{Optional: a character with the GraphViz's graph attributes*.
+\item{graph_options}{Optional: character constant (vector of length 1) with the GraphViz's edge
+global attributes* of the whole graph.
 See ** with 'graph' highlighted in the 'COMPONENTS' section.
 Default: \code{c('layout=dot', 'rankdir=LR')}.
 For the 'layout' see \url{https://en.wikipedia.org/wiki/Graphviz#Software_architecture};
@@ -144,8 +149,8 @@ Plot a diagram (directed graph) of top linkages
 \section{Footnotes}{
 
 
-* in the form of
-\code{c('attribute_name1=attribute_value1', 'attribute_name2=attribute_value2, etc.')}
+* in the form of comma-separate key=value pairs:
+\code{'attribute_name_1 = attribute_value_1, attribute_name_2 = attribute_value_2, ...'}
 
 ** \url{http://www.graphviz.org/doc/schema/attributes.xml}
 }

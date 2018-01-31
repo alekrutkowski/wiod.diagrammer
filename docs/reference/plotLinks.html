@@ -216,17 +216,22 @@ the 'COMPONENTS' section. Default: <code>'style=solid'</code> for the domestic f
     </tr>
     <tr>
       <th>general_arrow_options</th>
-      <td><p>Optional: a character vector with the GraphViz's edge
-attributes of all the arrows (edges)*. Default: <code>'color=grey'</code>.</p></td>
+      <td><p>Optional: a character constant (vector of length 1) with the GraphViz's edge
+global attributes* of all the arrows (edges)
+see ** with 'edge' highlighted in
+the 'COMPONENTS' section. . Default: <code>'color=grey'</code>.</p></td>
     </tr>
     <tr>
       <th>general_node_options</th>
-      <td><p>Optional: a character vector with the GraphViz's node
-attributes of all the nodes (country-sector boxes)*. Default: <code>'shape=box'</code>.</p></td>
+      <td><p>Optional: a character constant (vector of length 1) with the GraphViz's edge
+global attributes* of all the nodes (country-sector boxes)
+see ** with 'node' highlighted in
+the 'COMPONENTS' section. Default: <code>'shape=box'</code>.</p></td>
     </tr>
     <tr>
       <th>graph_options</th>
-      <td><p>Optional: a character with the GraphViz's graph attributes*.
+      <td><p>Optional: character constant (vector of length 1) with the GraphViz's edge
+global attributes* of the whole graph.
 See ** with 'graph' highlighted in the 'COMPONENTS' section.
 Default: <code>c('layout=dot', 'rankdir=LR')</code>.
 For the 'layout' see <a href='https://en.wikipedia.org/wiki/Graphviz#Software_architecture'>https://en.wikipedia.org/wiki/Graphviz#Software_architecture</a>;
@@ -261,8 +266,8 @@ if <code>gvcode = TRUE</code>.</p>
     <h2 class="hasAnchor" id="footnotes"><a class="anchor" href="#footnotes"></a>Footnotes</h2>
 
     
-    <p>* in the form of
-<code>c('attribute_name1=attribute_value1', 'attribute_name2=attribute_value2, etc.')</code></p>
+    <p>* in the form of comma-separate key=value pairs:
+<code>'attribute_name_1 = attribute_value_1, attribute_name_2 = attribute_value_2, ...'</code></p>
 <p>** <a href='http://www.graphviz.org/doc/schema/attributes.xml'>http://www.graphviz.org/doc/schema/attributes.xml</a></p>
     
 
