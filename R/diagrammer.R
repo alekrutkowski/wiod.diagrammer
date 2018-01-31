@@ -245,7 +245,7 @@ collapseAndFormatOptions <- function(charvec)
 #' * in the form of comma-separate key=value pairs:
 #' \code{'attribute_name_1 = attribute_value_1, attribute_name_2 = attribute_value_2, ...'}
 #'
-#' ** \url{http://www.graphviz.org/doc/schema/attributes.xml}
+#' ** \href{https://web.archive.org/web/20171217022658/http://www.graphviz.org/doc/schema/attributes.xml}{http://www.graphviz.org/doc/schema/attributes.xml}
 #'
 #' @return The return value of \code{\link[DiagrammeR]{grViz}} or the Graphviz code
 #' if \code{gvcode = TRUE}.

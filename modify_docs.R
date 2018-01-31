@@ -3,6 +3,10 @@ library(magrittr)
 mymods <-
     list(c(from='<p>Developed by Aleksander Rutkowski.</p>',
            to='<p>Developed by <a href="mailto:alek.rutkowski@gmail.com?subject=wiod.diagrammer">Aleksander Rutkowski</a>.</p>'),
+         c(from='attributes*',
+           to='atributes<a href="#footnotes">*</a>'),
+         c(from='see **',
+           to='see <a href="#footnotes">**</a>'),
          c(to="",
            from=
 "<div class='input'>#     x          y
