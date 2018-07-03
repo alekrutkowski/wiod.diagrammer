@@ -32,9 +32,11 @@ quo <- function(charvec)
 #' @export
 normalise <- function(numvec) {
     stopifnot(numvec %>% is.numeric)
-    min <- min(numvec, na.rm=TRUE)
-    spread <- max(numvec, na.rm=TRUE) - min
-    (numvec - min)/spread
+    if (length(numvec)==1) 0 else {
+        min <- min(numvec, na.rm=TRUE)
+        spread <- max(numvec, na.rm=TRUE) - min
+        (numvec - min)/spread
+    }
 }
 
 formatOptions <- function(...)
@@ -129,6 +131,9 @@ collapseAndFormatOptions <- function(charvec)
     charvec %>%
     paste(collapse=',') %>%
     formatOptions
+
+pasteIfNotEmptyString <- function(x, s)
+  if (s=="" || is.na(s)) x else paste(x, s)
 
 #' Plot a diagram (directed graph) of top linkages
 #'
@@ -315,6 +320,7 @@ plotLinks <- function(top_links_dt,
               'mln_USD_exchange_rate' %in% names(units),
               units$units_suffix %>% isString,
               units$mln_USD_exchange_rate %>% isNumericConstant,
+              units$mln_USD_exchange_rate > 0,
               country_labels_dt %>% isDataTable,
               country_labels_dt %>% has3LetterColumn('Country'),
               country_labels_dt %>% hasCharacterColumn('CountryLab'),
@@ -346,7 +352,7 @@ plotLinks <- function(top_links_dt,
                formatOptions((.$value*units$mln_USD_exchange_rate) %>%
                                  evalAndCheck('numberFormattingFun', E,
                                               function(vr) vr %>% is.character) %>%
-                                 paste(units$units_suffix) %>%
+                                 pasteIfNotEmptyString(units$units_suffix) %>%
                                  evalAndCheck('arrowLabelFun', E,
                                               function(vr) vr %>% is.character) %>%
                                  asLabel,
